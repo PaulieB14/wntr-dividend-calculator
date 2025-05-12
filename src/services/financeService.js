@@ -95,7 +95,7 @@ const parseDividendDataFromHTML = (htmlContent) => {
   // 2. Or use a proper HTML parsing library on the server side
   
   // Extract dividend table rows
-  const dividendRegex = /Ex-Dividend Date.*?(\\d{1,2}\\/\\d{1,2}\\/\\d{4}).*?Amount.*?\\$(\\d+\\.\\d+).*?Pay Date.*?(\\d{1,2}\\/\\d{1,2}\\/\\d{4})/gs;
+  const dividendRegex = /Ex-Dividend Date.*?(\d{1,2}\/\d{1,2}\/\d{4}).*?Amount.*?\$(\d+\.\d+).*?Pay Date.*?(\d{1,2}\/\d{1,2}\/\d{4})/gs;
   const matches = [...htmlContent.matchAll(dividendRegex)];
   
   return matches.map(match => {
