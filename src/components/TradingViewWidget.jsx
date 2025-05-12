@@ -17,7 +17,7 @@ function TradingViewWidget({ darkMode }) {
     script.innerHTML = `
       {
         "autosize": true,
-        "symbol": "ARCX:WNTR",
+        "symbol": "AMEX:WNTR",
         "interval": "D",
         "timezone": "Etc/UTC",
         "theme": "${darkMode ? 'dark' : 'light'}",
