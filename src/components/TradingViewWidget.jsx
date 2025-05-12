@@ -1,8 +1,9 @@
+// TradingViewWidget.jsx
 import React, { useEffect, useRef, memo } from 'react';
 
 function TradingViewWidget({ darkMode }) {
   const container = useRef();
-
+  
   useEffect(() => {
     // Clear container before adding new script
     if (container.current.childElementCount > 0) {
@@ -16,7 +17,7 @@ function TradingViewWidget({ darkMode }) {
     script.innerHTML = `
       {
         "autosize": true,
-        "symbol": "CFI:WNTR",
+        "symbol": "ARCX:WNTR",
         "interval": "D",
         "timezone": "Etc/UTC",
         "theme": "${darkMode ? 'dark' : 'light'}",
@@ -34,12 +35,12 @@ function TradingViewWidget({ darkMode }) {
       }
     };
   }, [darkMode]); // Re-run when darkMode changes
-
+  
   return (
     <div className="tradingview-widget-container" ref={container} style={{ height: "100%", width: "100%" }}>
       <div className="tradingview-widget-container__widget" style={{ height: "calc(100% - 32px)", width: "100%" }}></div>
       <div className="tradingview-widget-copyright">
-        <a href="https://www.tradingview.com/" rel="noopener noreferrer" target="_blank">
+        <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
           <span className={darkMode ? "text-blue-400" : "text-blue-600"}>Track all markets on TradingView</span>
         </a>
       </div>
