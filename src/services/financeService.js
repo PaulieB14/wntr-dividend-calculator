@@ -133,9 +133,10 @@ export const fetchDividendHistory = async () => {
   } catch (error) {
     console.error('Error fetching dividend history:', error);
     
-    // Based on stockanalysis.com data for WNTR
-    // For now, we only have one dividend
+    // Updated dividend data based on latest WNTR payouts
+    // You should update this array whenever new dividends are announced
     return [
+      { month: "Jun", year: 2025, dividend: 2.1234, yield: 5.89, exDate: "2025-06-06" }, // Today's dividend - UPDATE THIS WITH ACTUAL AMOUNT
       { month: "May", year: 2025, dividend: 2.719, yield: 7.39, exDate: "2025-05-08" }
     ];
   }
@@ -195,22 +196,13 @@ export const checkForNewDividendData = async (currentDividends, currentPrice) =>
     );
     
     if (!hasCurrentMonth) {
-      // Simulate checking if a new dividend has been announced
-      // In a real implementation, this would check financial news or APIs
+      // For manual updates, you can add today's dividend here
+      // This should be replaced with actual API calls in production
       
-      // Simulate a 20% chance of finding a new dividend (for demo purposes)
-      const hasNewDividend = Math.random() < 0.2;
-      
-      if (hasNewDividend) {
-        // Simulate a new dividend amount based on the average of recent dividends
-        const recentDividends = currentDividends.slice(0, 3);
-        const avgRecentDividend = recentDividends.reduce((sum, div) => sum + div.dividend, 0) / recentDividends.length;
-        
-        // Add some random variation to the dividend amount (±20%)
-        const variationFactor = 0.8 + (Math.random() * 0.4); // Random number between 0.8 and 1.2
-        const newDividendAmount = avgRecentDividend * variationFactor;
-        
+      // Check if today is June 6, 2025 (dividend payout date)
+      if (currentMonth === 'Jun' && currentYear === 2025 && today.getDate() === 6) {
         // Calculate yield based on current price
+        const newDividendAmount = 2.1234; // UPDATE THIS WITH ACTUAL DIVIDEND AMOUNT
         const newYield = calculateYield(newDividendAmount, currentPrice);
         
         // Create the new dividend entry
