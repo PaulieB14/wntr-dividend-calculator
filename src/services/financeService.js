@@ -2,18 +2,15 @@
  * Finance Service for WNTR Dashboard
  * 
  * This service handles real-time price data and dividend information fetching
+ * Auto-updated by GitHub Actions monthly
  */
 
 // Configuration
 const WNTR_SYMBOL = 'WNTR';
 const FINNHUB_API_KEY = process.env.REACT_APP_FINANCE_API_KEY || '';
 
-// API endpoints - Using different URLs for different services
+// API endpoints
 const FINNHUB_API_URL = `https://finnhub.io/api/v1/quote?symbol=${WNTR_SYMBOL}&token=${FINNHUB_API_KEY}`;
-
-// Fallback APIs - Note: In a real implementation, you would use different API keys for these services
-const ALPHA_VANTAGE_URL = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${WNTR_SYMBOL}&apikey=demo`;
-const BACKUP_PRICE_API = `https://api.polygon.io/v2/aggs/ticker/${WNTR_SYMBOL}/prev?apiKey=demo`;
 
 /**
  * Fetches real-time price data for WNTR
@@ -46,97 +43,42 @@ export const fetchRealTimePrice = async () => {
   } catch (error) {
     console.error('Error fetching real-time price from Finnhub:', error);
     
-    // Fallback to backup API if primary fails
-    try {
-      console.log('Attempting to use backup price API...');
-      const backupResponse = await fetch(BACKUP_PRICE_API);
-      if (!backupResponse.ok) {
-        throw new Error('Backup price API response was not ok');
-      }
-      
-      const backupData = await backupResponse.json();
-      const result = backupData.results[0];
-      
-      return {
-        currentPrice: result.c,
-        previousClose: result.o,
-        change: result.c - result.o,
-        percentChange: ((result.c - result.o) / result.o) * 100,
-        high: result.h,
-        low: result.l,
-        timestamp: new Date().toLocaleString(),
-      };
-    } catch (backupError) {
-      console.error('Error fetching from backup price API:', backupError);
-      
-      // If all APIs fail, return the most recent known price as a fallback
-      return {
-        currentPrice: 36.79, // Last known price from stockanalysis.com
-        previousClose: 36.66,
-        change: 0.13,
-        percentChange: 0.36,
-        high: 37.05,
-        low: 36.55,
-        timestamp: new Date().toLocaleString() + ' (Fallback data)',
-      };
-    }
+    // Return fallback data if API fails
+    return {
+      currentPrice: 36.79, 
+      previousClose: 36.66,
+      change: 0.13,
+      percentChange: 0.36,
+      high: 37.05,
+      low: 36.55,
+      timestamp: new Date().toLocaleString() + ' (Fallback data)',
+    };
   }
 };
 
 /**
- * Parses HTML content to extract dividend data
- * Note: In a production environment, you would use an official API instead
- * @param {string} htmlContent - HTML content to parse
- * @returns {Array} Array of dividend records
- */
-const parseDividendDataFromHTML = (htmlContent) => {
-  // This is a simplified example. In production, you would:
-  // 1. Use an official API that provides structured data
-  // 2. Or use a proper HTML parsing library on the server side
-  
-  // Extract dividend table rows
-  const dividendRegex = /Ex-Dividend Date.*?(\d{1,2}\/\d{1,2}\/\d{4}).*?Amount.*?\$(\d+\.\d+).*?Pay Date.*?(\d{1,2}\/\d{1,2}\/\d{4})/gs;
-  const matches = [...htmlContent.matchAll(dividendRegex)];
-  
-  return matches.map(match => {
-    const exDivDate = new Date(match[1]);
-    return {
-      exDividendDate: exDivDate.toISOString().split('T')[0],
-      amount: parseFloat(match[2]),
-      payDate: new Date(match[3]).toISOString().split('T')[0],
-      month: exDivDate.toLocaleString('default', { month: 'short' }),
-      year: exDivDate.getFullYear()
-    };
-  });
-};
-
-/**
  * Fetches dividend history data for WNTR
+ * This data is automatically updated by GitHub Actions
  * @returns {Promise<Array>} Dividend history
  */
 export const fetchDividendHistory = async () => {
   try {
-    // In a real implementation, this would use an API
-    // For demonstration, we'll simulate data fetching
-    // and use backup static data if API fails
+    // In production, you could also fetch from external APIs here as backup
+    console.log('Loading WNTR dividend history...');
     
-    // Simulated API call to get dividend history
-    const response = await fetch('https://proxy-api.example.com/dividends/WNTR');
-    
-    if (!response.ok) {
-      throw new Error('Dividend data API response was not ok');
-    }
-    
-    const data = await response.json();
-    return data.dividends;
+    // WNTR Monthly Dividend History (Auto-updated by GitHub Actions)
+    // DO NOT MANUALLY EDIT BELOW - Updated automatically by scripts/check-monthly-dividend.js
+    return [
+      { month: "Jun", year: 2025, dividend: 2.1234, yield: 5.89, exDate: "2025-06-06" },
+      { month: "May", year: 2025, dividend: 2.719, yield: 7.39, exDate: "2025-05-08" }
+    ];
+    // END AUTO-UPDATE SECTION
     
   } catch (error) {
     console.error('Error fetching dividend history:', error);
     
-    // Updated dividend data based on latest WNTR payouts
-    // You should update this array whenever new dividends are announced
+    // Fallback to last known data
     return [
-      { month: "Jun", year: 2025, dividend: 2.1234, yield: 5.89, exDate: "2025-06-06" }, // Today's dividend - UPDATE THIS WITH ACTUAL AMOUNT
       { month: "May", year: 2025, dividend: 2.719, yield: 7.39, exDate: "2025-05-08" }
     ];
   }
@@ -176,16 +118,14 @@ export const calculateAnnualizedYield = (dividends, currentPrice) => {
 
 /**
  * Checks for and adds new dividend data
+ * This function is primarily used by the automated system
  * @param {Array} currentDividends - Current dividend array
  * @param {number} currentPrice - Current stock price
  * @returns {Promise<Array>} Updated dividend array
  */
 export const checkForNewDividendData = async (currentDividends, currentPrice) => {
   try {
-    // For a real implementation, this would scrape a financial website
-    // or call an API to get the latest dividend announcements
-    
-    // Get the current month and year
+    // The automated system handles updates, but we can still do basic checks
     const today = new Date();
     const currentMonth = today.toLocaleString('default', { month: 'short' });
     const currentYear = today.getFullYear();
@@ -196,31 +136,10 @@ export const checkForNewDividendData = async (currentDividends, currentPrice) =>
     );
     
     if (!hasCurrentMonth) {
-      // For manual updates, you can add today's dividend here
-      // This should be replaced with actual API calls in production
-      
-      // Check if today is June 6, 2025 (dividend payout date)
-      if (currentMonth === 'Jun' && currentYear === 2025 && today.getDate() === 6) {
-        // Calculate yield based on current price
-        const newDividendAmount = 2.1234; // UPDATE THIS WITH ACTUAL DIVIDEND AMOUNT
-        const newYield = calculateYield(newDividendAmount, currentPrice);
-        
-        // Create the new dividend entry
-        const newDividend = {
-          month: currentMonth,
-          year: currentYear,
-          dividend: parseFloat(newDividendAmount.toFixed(4)),
-          yield: parseFloat(newYield.toFixed(2)),
-          exDate: today.toISOString().split('T')[0],
-          payDate: new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0]
-        };
-        
-        // Add to the beginning of the array (most recent first)
-        return [newDividend, ...currentDividends];
-      }
+      console.log(`No dividend found for ${currentMonth} ${currentYear} yet. Automated system will check soon.`);
     }
     
-    // Return original array if no new dividend
+    // Return original array - automated system handles updates
     return currentDividends;
   } catch (error) {
     console.error('Error checking for new dividend data:', error);
