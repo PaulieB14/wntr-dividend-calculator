@@ -58,49 +58,44 @@ export const fetchRealTimePrice = async () => {
 
 /**
  * Generate expected dividend based on historical patterns
- * WNTR typically pays dividends monthly, with amounts varying based on options strategies
+ * WNTR is a new ETF that started paying dividends in May 2025
  * @param {Array} historicalDividends - Historical dividend data
  * @param {string} month - Target month (e.g., "Jul")
  * @param {number} year - Target year
  * @returns {number} Expected dividend amount
  */
 const generateExpectedDividend = (historicalDividends, month, year) => {
-  // Get the last 6 months of data for trend analysis
-  const recentDividends = historicalDividends.slice(0, 6);
+  // Since WNTR is new (started May 2025), we have limited history
+  if (historicalDividends.length === 0) {
+    // If no history, use a reasonable estimate for new WNTR dividend
+    return 2.5; // Conservative estimate based on May 2025 ($2.719)
+  }
   
-  // Calculate weighted average (more recent months weighted higher)
-  let weightedSum = 0;
-  let totalWeight = 0;
+  // Calculate average from available data
+  const totalDividends = historicalDividends.reduce((sum, item) => sum + item.dividend, 0);
+  const avgDividend = totalDividends / historicalDividends.length;
   
-  recentDividends.forEach((div, index) => {
-    const weight = 6 - index; // More recent = higher weight
-    weightedSum += div.dividend * weight;
-    totalWeight += weight;
-  });
+  // Add some variation based on typical WNTR volatility (+/- 20%)
+  const variationFactor = 0.8 + (Math.random() * 0.4); // Random between 0.8 and 1.2
   
-  const baseExpectedDividend = weightedSum / totalWeight;
-  
-  // Add some variation based on typical WNTR volatility (+/- 25%)
-  const variationFactor = 0.75 + (Math.random() * 0.5); // Random between 0.75 and 1.25
-  
-  return baseExpectedDividend * variationFactor;
+  return avgDividend * variationFactor;
 };
 
 /**
  * Get the expected dividend payout date for a given month
- * WNTR typically pays between 5th-10th of each month
+ * WNTR typically pays around 8th-9th of each month
  * @param {number} year - Year
  * @param {number} monthIndex - Month index (0-11)
  * @returns {Object} Ex-dividend and payment dates
  */
 const getExpectedPayoutDates = (year, monthIndex) => {
-  // Ex-dividend date is typically 5th-8th of the month
-  const exDay = 5 + Math.floor(Math.random() * 4); // Random between 5-8
+  // Ex-dividend date is typically 8th of the month (based on May 2025 pattern)
+  const exDay = 8;
   const exDate = new Date(year, monthIndex, exDay);
   
-  // Payment date is typically 1-2 days after ex-dividend date
+  // Payment date is typically 1 day after ex-dividend date
   const payDate = new Date(exDate);
-  payDate.setDate(exDate.getDate() + 1 + Math.floor(Math.random() * 2)); // +1 or +2 days
+  payDate.setDate(exDate.getDate() + 1);
   
   return {
     exDate: exDate.toISOString().split('T')[0],
@@ -110,28 +105,37 @@ const getExpectedPayoutDates = (year, monthIndex) => {
 
 /**
  * Fetches dividend history data for WNTR
- * Enhanced with corrected June 2025 dividend and more historical data
+ * CORRECTED: WNTR started paying dividends in May 2025
  * @returns {Promise<Array>} Dividend history
  */
 export const fetchDividendHistory = async () => {
   try {
     console.log('Loading WNTR dividend history...');
     
-    // WNTR Monthly Dividend History (CORRECTED June 2025 dividend)
+    // WNTR Dividend History (CORRECTED - Started May 2025)
     // June 2025 dividend corrected from $2.1234 to actual $3.07
     return [
-      { month: "Jun", year: 2025, dividend: 3.07, yield: 8.35, exDate: "2025-06-06", payDate: "2025-06-09" },
-      { month: "May", year: 2025, dividend: 2.719, yield: 7.39, exDate: "2025-05-08", payDate: "2025-05-09" },
-      { month: "Apr", year: 2025, dividend: 2.456, yield: 6.68, exDate: "2025-04-10", payDate: "2025-04-11" },
-      { month: "Mar", year: 2025, dividend: 2.834, yield: 7.71, exDate: "2025-03-13", payDate: "2025-03-14" },
-      { month: "Feb", year: 2025, dividend: 3.125, yield: 8.49, exDate: "2025-02-13", payDate: "2025-02-14" },
-      { month: "Jan", year: 2025, dividend: 2.987, yield: 8.12, exDate: "2025-01-16", payDate: "2025-01-17" },
-      { month: "Dec", year: 2024, dividend: 3.456, yield: 9.39, exDate: "2024-12-19", payDate: "2024-12-20" },
-      { month: "Nov", year: 2024, dividend: 2.678, yield: 7.28, exDate: "2024-11-21", payDate: "2024-11-22" },
-      { month: "Oct", year: 2024, dividend: 2.923, yield: 7.94, exDate: "2024-10-24", payDate: "2024-10-25" },
-      { month: "Sep", year: 2024, dividend: 2.567, yield: 6.98, exDate: "2024-09-06", payDate: "2024-09-09" },
-      { month: "Aug", year: 2024, dividend: 2.789, yield: 7.58, exDate: "2024-08-07", payDate: "2024-08-08" },
-      { month: "Jul", year: 2024, dividend: 3.234, yield: 8.79, exDate: "2024-07-05", payDate: "2024-07-08" }
+      { 
+        month: "Jun", 
+        year: 2025, 
+        dividend: 3.07, 
+        yield: 8.35, 
+        exDate: "2025-06-06", 
+        payDate: "2025-06-09",
+        declarationDate: "2025-05-28",
+        recordDate: "2025-06-06"
+      },
+      { 
+        month: "May", 
+        year: 2025, 
+        dividend: 2.719, 
+        yield: 7.39, 
+        exDate: "2025-05-08", 
+        payDate: "2025-05-09",
+        declarationDate: "2025-03-28",
+        recordDate: "2025-05-08",
+        firstDividend: true // Mark as the first dividend
+      }
     ];
     
   } catch (error) {
@@ -140,7 +144,7 @@ export const fetchDividendHistory = async () => {
     // Fallback to essential data with corrected June dividend
     return [
       { month: "Jun", year: 2025, dividend: 3.07, yield: 8.35, exDate: "2025-06-06", payDate: "2025-06-09" },
-      { month: "May", year: 2025, dividend: 2.719, yield: 7.39, exDate: "2025-05-08", payDate: "2025-05-09" }
+      { month: "May", year: 2025, dividend: 2.719, yield: 7.39, exDate: "2025-05-08", payDate: "2025-05-09", firstDividend: true }
     ];
   }
 };
@@ -157,6 +161,7 @@ export const calculateYield = (dividendAmount, price) => {
 
 /**
  * Calculates annualized yield based on monthly dividends
+ * For WNTR (new ETF), we'll project based on available data
  * @param {Array} dividends - Array of dividend objects
  * @param {number} currentPrice - Current price
  * @returns {number} Annualized yield percentage
@@ -166,20 +171,19 @@ export const calculateAnnualizedYield = (dividends, currentPrice) => {
     return 0;
   }
   
-  // Use up to 12 most recent months
-  const recentDividends = dividends.slice(0, Math.min(12, dividends.length));
-  const totalDividend = recentDividends.reduce((sum, item) => sum + item.dividend, 0);
+  // Since WNTR is new, calculate average from available dividends and annualize
+  const totalDividend = dividends.reduce((sum, item) => sum + item.dividend, 0);
+  const avgMonthlyDividend = totalDividend / dividends.length;
   
-  // If we have less than 12 months of data, annualize it
-  const annualFactor = 12 / recentDividends.length;
-  const annualizedDividend = totalDividend * annualFactor;
+  // Annualize the average monthly dividend
+  const annualizedDividend = avgMonthlyDividend * 12;
   
   return (annualizedDividend / currentPrice) * 100;
 };
 
 /**
  * Check if we're in the expected dividend announcement period
- * WNTR typically announces dividends 5-10 days before ex-dividend date
+ * WNTR typically announces dividends around end of previous month
  * @param {Date} currentDate - Current date
  * @param {string} month - Month to check
  * @param {number} year - Year to check
@@ -191,12 +195,13 @@ const isInAnnouncementPeriod = (currentDate, month, year) => {
   
   if (monthIndex === -1) return false;
   
-  // Expected ex-dividend date (usually 5th-8th of month)
-  const expectedExDate = new Date(year, monthIndex, 6); // Use 6th as average
+  // Expected ex-dividend date (usually 8th of month based on pattern)
+  const expectedExDate = new Date(year, monthIndex, 8);
   
-  // Announcement period: 3-12 days before ex-dividend date
+  // Announcement period: Usually end of previous month (25th-30th)
   const announcementStart = new Date(expectedExDate);
-  announcementStart.setDate(expectedExDate.getDate() - 12);
+  announcementStart.setMonth(expectedExDate.getMonth() - 1);
+  announcementStart.setDate(25);
   
   const announcementEnd = new Date(expectedExDate);
   announcementEnd.setDate(expectedExDate.getDate() - 3);
@@ -217,8 +222,8 @@ const shouldHavePaidDividend = (currentDate, month, year) => {
   
   if (monthIndex === -1) return false;
   
-  // Expected payment date (usually 10th-12th of month)
-  const expectedPayDate = new Date(year, monthIndex, 12);
+  // Expected payment date (usually 9th-10th of month)
+  const expectedPayDate = new Date(year, monthIndex, 10);
   
   return currentDate > expectedPayDate;
 };
