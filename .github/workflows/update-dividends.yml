@@ -1,13 +1,13 @@
-name: Update WNTR Dividend Data
+name: Update WNTR Monthly Dividend
 
 on:
   schedule:
-    # Run daily at 6 PM EST (after market close)
-    - cron: '0 23 * * *'
+    # Check for new dividends on the 5th-10th of each month (typical WNTR announcement period)
+    - cron: '0 20 5-10 * *'  # 8 PM UTC daily from 5th-10th of each month
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  update-dividends:
+  check-monthly-dividend:
     runs-on: ubuntu-latest
     
     steps:
@@ -24,21 +24,22 @@ jobs:
     - name: Install dependencies
       run: npm install axios cheerio
       
-    - name: Check for new dividends
+    - name: Check for new monthly dividend
       run: |
-        node scripts/check-dividends.js
+        node scripts/check-monthly-dividend.js
       env:
+        POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         ALPHA_VANTAGE_API_KEY: ${{ secrets.ALPHA_VANTAGE_API_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Commit and push if changed
+    - name: Commit and push if new dividend found
       run: |
-        git config --global user.name 'Dividend Bot'
-        git config --global user.email 'action@github.com'
+        git config --global user.name 'WNTR Dividend Bot'
+        git config --global user.email 'dividend-bot@github.com'
         git add -A
         if git diff --staged --quiet; then
-          echo "No changes to commit"
+          echo "No new dividend data found"
         else
-          git commit -m "Auto-update: New WNTR dividend data [$(date)]"
+          git commit -m "🎉 New WNTR dividend detected for $(date +'%B %Y')"
           git push
         fi
