@@ -1,0 +1,16 @@
+{
+  "name": "dividend-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for WNTR dividend data management",
+  "main": "check-monthly-dividend.js",
+  "scripts": {
+    "check-dividends": "node check-monthly-dividend.js",
+    "test": "echo \"No tests specified\""
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "author": "PaulieB14",
+  "license": "MIT"
+}
