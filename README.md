@@ -53,6 +53,33 @@ npm start
 - View historical data in the dividend history table
 - See visualizations of dividend amounts, yields, and projected returns in the charts
 
+## Updating Dividend Data
+
+### Manual Updates
+When WNTR announces a new dividend, update the dividend data in `src/services/financeService.js`:
+
+1. Find the `fetchDividendHistory` function
+2. Add the new dividend entry to the array:
+```javascript
+return [
+  { month: "Jun", year: 2025, dividend: 2.1234, yield: 5.89, exDate: "2025-06-06" }, // New dividend
+  { month: "May", year: 2025, dividend: 2.719, yield: 7.39, exDate: "2025-05-08" }  // Previous dividends
+];
+```
+
+### Automated Updates (Recommended)
+For automatic dividend data updates, consider:
+
+1. **API Integration**: Use financial APIs like Alpha Vantage, Polygon.io, or IEX Cloud
+2. **Web Scraping**: Set up automated scraping of financial websites
+3. **GitHub Actions**: Create automated workflows to check for new dividends daily
+
+## Data Sources
+
+- **Price Data**: Finnhub API (with fallback to backup APIs)
+- **Dividend Data**: Currently manual updates (see above for automation options)
+- **Chart Data**: TradingView widget integration
+
 ## Technologies Used
 
 - React
@@ -71,6 +98,34 @@ npm run build
 
 This creates an optimized production build in the `build` folder.
 
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/dividend-api`)
+3. Make your changes
+4. Update dividend data when new payouts are announced
+5. Submit a pull request
+
+## Troubleshooting
+
+### Dashboard Not Updating with New Dividends
+
+If your dashboard isn't showing the latest dividend:
+
+1. **Check the dividend data** in `src/services/financeService.js`
+2. **Verify the date logic** in `checkForNewDividendData`
+3. **Clear browser cache** and refresh the page
+4. **Check console errors** in browser developer tools
+5. **Verify API keys** are properly configured
+
+### Price Data Issues
+
+If price data isn't loading:
+
+1. **Check your Finnhub API key** in the `.env` file
+2. **Verify API limits** haven't been exceeded
+3. **Check network connectivity** and CORS settings
+
 ## Disclaimer
 
 This dashboard is for informational purposes only. Historical dividend payments may not be indicative of future returns. WNTR dividends can vary significantly month to month based on the fund's strategy of selling options on MicroStrategy (MSTR). The YieldMax MSTR Short Option Income Strategy ETF (WNTR) is an actively managed ETF that uses options strategies which may limit upside potential. Please consult with a financial advisor before making investment decisions.
@@ -83,3 +138,4 @@ MIT
 
 - Based on the [MSTY Dividend Calculator](https://github.com/PaulieB14/msty-dividend-calculator)
 - Dividend data sourced from [StockAnalysis.com](https://stockanalysis.com/etf/wntr/dividend/)
+- Price data provided by [Finnhub.io](https://finnhub.io/)
